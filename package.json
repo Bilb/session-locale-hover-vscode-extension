@@ -7,6 +7,11 @@
   "engines": {
     "vscode": "^1.74.0"
   },
+  "publisher": "bilb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bilb/session-locale-hover-vscode-extension"
+  },
   "categories": [
     "Other"
   ],
@@ -35,5 +40,7 @@
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.74.0",
     "typescript": "^5.0.0"
-  }
+  },
+  "icon": "icon.png",
+  "license": "MIT"
 }
