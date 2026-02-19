@@ -1,0 +1,39 @@
+{
+  "name": "session-locale-hover",
+  "displayName": "Session Locale Hover",
+  "description": "Hover over tr() tokens or { token: '...' } to see the English string from english.ts",
+  "version": "0.0.1",
+  "packageManager": "pnpm@10.28.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Session Locale Hover",
+      "properties": {
+        "sessionLocaleHover.englishTsPath": {
+          "type": "string",
+          "default": "ts/localization/generated/english.ts",
+          "description": "Path to english.ts relative to workspace root"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^5.0.0"
+  }
+}
