@@ -13,17 +13,23 @@ type TokenMap = Record<string, TokenValue>;
 let tokenMap: TokenMap = {};
 let fileWatcher: vscode.FileSystemWatcher | undefined;
 
-function getEnglishTsPath(): string | undefined {
+async function getEnglishTsPath(): Promise<string | undefined> {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     return undefined;
   }
+
   const config = vscode.workspace.getConfiguration('sessionLocaleHover');
-  const relativePath = config.get<string>(
-    'englishTsPath',
-    'ts/localization/generated/english.ts'
-  );
-  return path.join(workspaceFolders[0].uri.fsPath, relativePath);
+  const configuredPath = config.get<string>('englishTsPath');
+
+  // If the user explicitly set a path, honour it
+  if (configuredPath) {
+    return path.join(workspaceFolders[0].uri.fsPath, configuredPath);
+  }
+
+  // Otherwise auto-discover the first english.ts in the workspace
+  const found = await vscode.workspace.findFiles('**/english.ts', '**/node_modules/**', 1);
+  return found[0]?.fsPath;
 }
 
 function unescapeString(raw: string): string {
@@ -84,15 +90,15 @@ function parseEnglishTs(content: string): TokenMap {
   return map;
 }
 
-function loadTokenMap(): void {
-  const englishTsPath = getEnglishTsPath();
+async function loadTokenMap(): Promise<void> {
+  const englishTsPath = await getEnglishTsPath();
   if (!englishTsPath) {
     return;
   }
   try {
     const content = fs.readFileSync(englishTsPath, 'utf-8');
     tokenMap = parseEnglishTs(content);
-    console.log(`[session-locale-hover] Loaded ${Object.keys(tokenMap).length} tokens`);
+    console.log(`[session-locale-hover] Loaded ${Object.keys(tokenMap).length} tokens from ${englishTsPath}`);
   } catch (err) {
     console.error('[session-locale-hover] Failed to read english.ts:', err);
   }
@@ -122,6 +128,8 @@ function findTokensInLine(line: string): TokenRange[] {
   const patterns: RegExp[] = [
     // tr('tokenName') or tr("tokenName") – first arg only
     /\btr\(\s*(['"])(\w+)\1/g,
+    // tStripped('tokenName') or tStripped("tokenName") – first arg only
+    /\btStripped\(\s*(['"])(\w+)\1/g,
     // token: 'tokenName' or token: "tokenName"
     /\btoken\s*:\s*(['"])(\w+)\1/g,
   ];
@@ -173,13 +181,13 @@ function buildHoverContent(tokenName: string, value: TokenValue): vscode.Markdow
   return md;
 }
 
-export function activate(context: vscode.ExtensionContext): void {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   console.log('[session-locale-hover] Activating…');
 
-  loadTokenMap();
+  await loadTokenMap();
 
   // Watch english.ts for changes (it is auto-generated)
-  const englishTsPath = getEnglishTsPath();
+  const englishTsPath = await getEnglishTsPath();
   if (englishTsPath) {
     const watchPattern = new vscode.RelativePattern(
       path.dirname(englishTsPath),
