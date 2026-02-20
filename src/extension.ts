@@ -130,8 +130,10 @@ function findTokensInLine(line: string): TokenRange[] {
     /\btr\(\s*(['"])(\w+)\1/g,
     // tStripped('tokenName') or tStripped("tokenName") – first arg only
     /\btStripped\(\s*(['"])(\w+)\1/g,
-    // token: 'tokenName' or token: "tokenName"
+    // token: 'tokenName' or token: "tokenName"  (JS object)
     /\btoken\s*:\s*(['"])(\w+)\1/g,
+    // token="tokenName" or token='tokenName'  (JSX attribute)
+    /\btoken\s*=\s*(['"])(\w+)\1/g,
   ];
 
   for (const re of patterns) {
@@ -188,6 +190,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   // Watch english.ts for changes (it is auto-generated)
   const englishTsPath = await getEnglishTsPath();
+  console.log(`[session-locale-hover] english.ts path: ${englishTsPath ?? 'not found'}`);
   if (englishTsPath) {
     const watchPattern = new vscode.RelativePattern(
       path.dirname(englishTsPath),
