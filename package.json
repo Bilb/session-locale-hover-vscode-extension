@@ -2,7 +2,7 @@
   "name": "session-locale-hover",
   "displayName": "Session Locale Hover",
   "description": "Hover over tr() tokens or { token: '...' } to see the English string from english.ts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "packageManager": "pnpm@10.28.1",
   "engines": {
     "vscode": "^1.74.0"
@@ -26,7 +26,7 @@
       "properties": {
         "sessionLocaleHover.englishTsPath": {
           "type": "string",
-          "default": "ts/localization/generated/english.ts",
+          "default": "",
           "description": "Path to english.ts relative to workspace root"
         }
       }
